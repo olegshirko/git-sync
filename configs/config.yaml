@@ -1,0 +1,23 @@
+# gitlab_token: Ваш Personal Access Token для GitLab.
+# Требуется для доступа к репозиториям GitLab.
+# Убедитесь, что токен имеет достаточные права (например, read_repository, write_repository).
+gitlab_token: "your_gitlab_personal_access_token_here"
+
+# ssh_key_path: Полный путь к вашему приватному SSH-ключу.
+# Используется для аутентификации при доступе к приватным репозиториям через SSH.
+# Пример: /home/user/.ssh/id_rsa или C:\Users\user\.ssh\id_rsa
+# Если вы используете HTTPS для приватных репозиториев, это поле может быть пустым.
+ssh_key_path: "/path/to/your/ssh/id_rsa"
+
+# temp_dir: Временная директория, куда будут клонироваться репозитории для синхронизации.
+# Убедитесь, что у пользователя, от имени которого запускается сервис, есть права на запись в эту директорию.
+temp_dir: "/tmp/git-sync-repos"
+
+# repositories: Список пар репозиториев для синхронизации.
+# Вы можете добавить любое количество пар.
+repositories:
+  - gitlab_url: "https://gitlab.com/your-group/your-gitlab-repo-1.git"
+    private_repo_url: "git@github.com:your-org/your-private-repo-1.git" # Или HTTPS: https://github.com/your-org/your-private-repo-1.git
+  - gitlab_url: "https://gitlab.com/another-group/your-gitlab-repo-2.git"
+    private_repo_url: "git@bitbucket.org:another-org/your-private-repo-2.git"
+  # Добавьте другие пары репозиториев по мере необходимости

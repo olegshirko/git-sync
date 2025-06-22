@@ -1,0 +1,828 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>git-sync-service: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">git-sync/cmd/git-sync-service/main.go (0.0%)</option>
+				
+				<option value="file1">git-sync/configs/config.go (100.0%)</option>
+				
+				<option value="file2">git-sync/internal/repository/manager.go (31.0%)</option>
+				
+				<option value="file3">git-sync/internal/sync/logic.go (10.9%)</option>
+				
+				<option value="file4">git-sync/test/testutils.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "fmt"
+        "log"
+        "os"
+
+        "git-sync/configs"
+        "git-sync/internal/repository"
+        "git-sync/internal/sync"
+)
+
+func main() <span class="cov0" title="0">{
+        // Загрузка конфигурации
+        cfg, err := configs.LoadConfig("configs/config.yaml")
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Ошибка загрузки конфигурации: %v", err)
+        }</span>
+
+        // Инициализация менеджера репозиториев
+        <span class="cov0" title="0">repoManager := repository.NewManager(cfg.TempDir)
+
+        // Инициализация логики синхронизации
+        syncLogic := sync.NewLogic(repoManager)
+
+        // Выполнение синхронизации для каждой пары репозиториев
+        for _, repoPair := range cfg.Repositories </span><span class="cov0" title="0">{
+                fmt.Printf("Синхронизация репозиториев: %s &lt;-&gt; %s\n", repoPair.GitlabURL, repoPair.PrivateRepoURL)
+                err := syncLogic.Synchronize(repoPair.GitlabURL, repoPair.PrivateRepoURL, cfg.GitlabToken, cfg.SSHKeyPath)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Printf("Ошибка синхронизации %s &lt;-&gt; %s: %v\n", repoPair.GitlabURL, repoPair.PrivateRepoURL, err)
+                }</span> else<span class="cov0" title="0"> {
+                        fmt.Printf("Синхронизация %s &lt;-&gt; %s завершена успешно.\n", repoPair.GitlabURL, repoPair.PrivateRepoURL)
+                }</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println("Сервис синхронизации завершил работу.")
+        os.Exit(0)</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package configs
+
+import (
+        "fmt"
+        "os"
+
+        "gopkg.in/yaml.v2"
+)
+
+// Config структура для хранения конфигурации сервиса
+type Config struct {
+        GitlabToken  string           `yaml:"gitlab_token"`
+        SSHKeyPath   string           `yaml:"ssh_key_path"`
+        TempDir      string           `yaml:"temp_dir"`
+        Repositories []RepositoryPair `yaml:"repositories"`
+}
+
+// RepositoryPair структура для пары репозиториев
+type RepositoryPair struct {
+        GitlabURL      string `yaml:"gitlab_url"`
+        PrivateRepoURL string `yaml:"private_repo_url"`
+}
+
+// LoadConfig загружает конфигурацию из указанного файла
+func LoadConfig(filePath string) (*Config, error) <span class="cov8" title="1">{
+        data, err := os.ReadFile(filePath)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("не удалось прочитать файл конфигурации %s: %w", filePath, err)
+        }</span>
+
+        <span class="cov8" title="1">var cfg Config
+        err = yaml.Unmarshal(data, &amp;cfg)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("не удалось распарсить файл конфигурации %s: %w", filePath, err)
+        }</span>
+
+        <span class="cov8" title="1">return &amp;cfg, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package repository
+
+import (
+        "fmt"
+        "os"
+        "path/filepath"
+
+        "github.com/go-git/go-git/v5"
+        "github.com/go-git/go-git/v5/plumbing/transport/http"
+        "github.com/go-git/go-git/v5/plumbing/transport/ssh"
+)
+
+// Manager управляет операциями с Git-репозиториями
+type Manager struct {
+        tempDir string
+}
+
+// NewManager создает новый экземпляр Manager
+func NewManager(tempDir string) *Manager <span class="cov8" title="1">{
+        return &amp;Manager{
+                tempDir: tempDir,
+        }
+}</span>
+
+// Clone клонирует репозиторий по URL в указанную директорию
+func (m *Manager) Clone(repoURL, path, token, sshKeyPath string) (*git.Repository, error) <span class="cov8" title="1">{
+        cloneOptions := &amp;git.CloneOptions{
+                URL: repoURL,
+        }
+
+        if token != "" </span><span class="cov8" title="1">{
+                cloneOptions.Auth = &amp;http.BasicAuth{
+                        Username: "oauth2", // Для GitLab Personal Access Token
+                        Password: token,
+                }
+        }</span> else<span class="cov8" title="1"> if sshKeyPath != "" </span><span class="cov8" title="1">{
+                sshAuth, err := ssh.NewPublicKeysFromFile("git", sshKeyPath, "")
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, fmt.Errorf("не удалось создать SSH-аутентификацию: %w", err)
+                }</span>
+                <span class="cov0" title="0">cloneOptions.Auth = sshAuth</span>
+        }
+
+        <span class="cov8" title="1">repo, err := git.PlainClone(path, false, cloneOptions)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("не удалось клонировать репозиторий %s: %w", repoURL, err)
+        }</span>
+        <span class="cov0" title="0">return repo, nil</span>
+}
+
+// Pull обновляет репозиторий
+func (m *Manager) Pull(repo *git.Repository, token, sshKeyPath string) error <span class="cov0" title="0">{
+        w, err := repo.Worktree()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("не удалось получить Worktree: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">pullOptions := &amp;git.PullOptions{}
+        if token != "" </span><span class="cov0" title="0">{
+                pullOptions.Auth = &amp;http.BasicAuth{
+                        Username: "oauth2",
+                        Password: token,
+                }
+        }</span> else<span class="cov0" title="0"> if sshKeyPath != "" </span><span class="cov0" title="0">{
+                sshAuth, err := ssh.NewPublicKeysFromFile("git", sshKeyPath, "")
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("не удалось создать SSH-аутентификацию: %w", err)
+                }</span>
+                <span class="cov0" title="0">pullOptions.Auth = sshAuth</span>
+        }
+
+        <span class="cov0" title="0">err = w.Pull(pullOptions)
+        if err != nil &amp;&amp; err != git.NoErrAlreadyUpToDate </span><span class="cov0" title="0">{
+                return fmt.Errorf("не удалось выполнить pull: %w", err)
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// Push отправляет изменения в удаленный репозиторий
+func (m *Manager) Push(repo *git.Repository, token, sshKeyPath string) error <span class="cov0" title="0">{
+        pushOptions := &amp;git.PushOptions{}
+        if token != "" </span><span class="cov0" title="0">{
+                pushOptions.Auth = &amp;http.BasicAuth{
+                        Username: "oauth2",
+                        Password: token,
+                }
+        }</span> else<span class="cov0" title="0"> if sshKeyPath != "" </span><span class="cov0" title="0">{
+                sshAuth, err := ssh.NewPublicKeysFromFile("git", sshKeyPath, "")
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("не удалось создать SSH-аутентификацию: %w", err)
+                }</span>
+                <span class="cov0" title="0">pushOptions.Auth = sshAuth</span>
+        }
+
+        <span class="cov0" title="0">err := repo.Push(pushOptions)
+        if err != nil &amp;&amp; err != git.NoErrAlreadyUpToDate </span><span class="cov0" title="0">{
+                return fmt.Errorf("не удалось выполнить push: %w", err)
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// CleanTempDir очищает временную директорию
+func (m *Manager) CleanTempDir() error <span class="cov8" title="1">{
+        return os.RemoveAll(m.tempDir)
+}</span>
+
+// CreateTempRepoPath создает путь для временного репозитория
+func (m *Manager) CreateTempRepoPath(repoName string) string <span class="cov8" title="1">{
+        return filepath.Join(m.tempDir, repoName)
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package sync
+
+import (
+        "fmt"
+        "log"
+        "strings"
+
+        "git-sync/internal/repository"
+
+        "github.com/go-git/go-git/v5"
+        gitconfig "github.com/go-git/go-git/v5/config"
+        "github.com/go-git/go-git/v5/plumbing"
+        "github.com/go-git/go-git/v5/plumbing/transport"
+        "github.com/go-git/go-git/v5/plumbing/transport/http"
+        "github.com/go-git/go-git/v5/plumbing/transport/ssh"
+)
+
+// Logic содержит логику синхронизации репозиториев
+type Logic struct {
+        repoManager *repository.Manager
+}
+
+// NewLogic создает новый экземпляр Logic
+func NewLogic(repoManager *repository.Manager) *Logic <span class="cov8" title="1">{
+        return &amp;Logic{
+                repoManager: repoManager,
+        }
+}</span>
+
+// Synchronize выполняет двустороннюю синхронизацию между двумя репозиториями
+func (l *Logic) Synchronize(gitlabURL, privateRepoURL, gitlabToken, sshKeyPath string) error <span class="cov0" title="0">{
+        gitlabRepoName := getRepoNameFromURL(gitlabURL)
+        privateRepoName := getRepoNameFromURL(privateRepoURL)
+
+        gitlabLocalPath := l.repoManager.CreateTempRepoPath(gitlabRepoName)
+        privateLocalPath := l.repoManager.CreateTempRepoPath(privateRepoName)
+
+        defer func() </span><span class="cov0" title="0">{
+                log.Printf("Очистка временных директорий: %s, %s", gitlabLocalPath, privateLocalPath)
+                if err := l.repoManager.CleanTempDir(); err != nil </span><span class="cov0" title="0">{
+                        log.Printf("Ошибка очистки временной директории: %v", err)
+                }</span>
+        }()
+
+        // Клонирование/обновление GitLab репозитория
+        <span class="cov0" title="0">log.Printf("Клонирование/обновление GitLab репозитория: %s в %s", gitlabURL, gitlabLocalPath)
+        gitlabRepo, err := l.repoManager.Clone(gitlabURL, gitlabLocalPath, gitlabToken, "")
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("не удалось клонировать/обновить GitLab репозиторий: %w", err)
+        }</span>
+        <span class="cov0" title="0">if err := l.repoManager.Pull(gitlabRepo, gitlabToken, ""); err != nil </span><span class="cov0" title="0">{
+                log.Printf("Предупреждение: не удалось выполнить pull для GitLab репозитория: %v", err)
+        }</span>
+
+        // Клонирование/обновление приватного репозитория
+        <span class="cov0" title="0">log.Printf("Клонирование/обновление приватного репозитория: %s в %s", privateRepoURL, privateLocalPath)
+        privateRepo, err := l.repoManager.Clone(privateRepoURL, privateLocalPath, "", sshKeyPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("не удалось клонировать/обновить приватный репозиторий: %w", err)
+        }</span>
+        <span class="cov0" title="0">if err := l.repoManager.Pull(privateRepo, "", sshKeyPath); err != nil </span><span class="cov0" title="0">{
+                log.Printf("Предупреждение: не удалось выполнить pull для приватного репозитория: %v", err)
+        }</span>
+
+        // Синхронизация GitLab -&gt; Private
+        <span class="cov0" title="0">log.Printf("Синхронизация GitLab -&gt; Private для %s", gitlabURL)
+        if err := l.syncBranches(gitlabRepo, privateRepo, gitlabToken, sshKeyPath); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("ошибка синхронизации GitLab -&gt; Private: %w", err)
+        }</span>
+
+        // Синхронизация Private -&gt; GitLab
+        <span class="cov0" title="0">log.Printf("Синхронизация Private -&gt; GitLab для %s", privateRepoURL)
+        if err := l.syncBranches(privateRepo, gitlabRepo, "", gitlabToken); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("ошибка синхронизации Private -&gt; GitLab: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// syncBranches синхронизирует ветки между source и destination репозиториями
+func (l *Logic) syncBranches(sourceRepo, destinationRepo *git.Repository, sourceToken, destToken string) error <span class="cov0" title="0">{
+        // Получаем remote для source репозитория
+        sourceRemote, err := sourceRepo.Remote("origin")
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("не удалось получить remote 'origin' для source репозитория: %w", err)
+        }</span>
+
+        // Получаем URL source репозитория
+        <span class="cov0" title="0">sourceURL := sourceRemote.Config().URLs[0]
+        log.Printf("Source URL: %s", sourceURL)
+
+        // Получаем метод аутентификации для source репозитория
+        sourceAuth, err := l.getAuthMethod(sourceToken, "")
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("не удалось получить метод аутентификации для source: %w", err)
+        }</span>
+
+        // Получаем метод аутентификации для destination репозитория
+        <span class="cov0" title="0">destAuth, err := l.getAuthMethod(destToken, "")
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("не удалось получить метод аутентификации для destination: %w", err)
+        }</span>
+
+        // Добавляем source репозиторий как remote в destination репозиторий
+        <span class="cov0" title="0">remoteName := "sync-source"
+        _, err = destinationRepo.CreateRemote(&amp;gitconfig.RemoteConfig{
+                Name: remoteName,
+                URLs: []string{sourceURL},
+        })
+        if err != nil &amp;&amp; err != git.ErrRemoteExists </span><span class="cov0" title="0">{
+                return fmt.Errorf("не удалось создать remote %s: %w", remoteName, err)
+        }</span>
+
+        // Получаем remote для fetch
+        <span class="cov0" title="0">syncRemote, err := destinationRepo.Remote(remoteName)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("не удалось получить remote %s: %w", remoteName, err)
+        }</span>
+
+        // Выполняем fetch из source репозитория
+        <span class="cov0" title="0">log.Printf("Выполняем fetch из source репозитория")
+        err = syncRemote.Fetch(&amp;git.FetchOptions{
+                Auth: sourceAuth,
+        })
+        if err != nil &amp;&amp; err != git.NoErrAlreadyUpToDate </span><span class="cov0" title="0">{
+                return fmt.Errorf("не удалось выполнить fetch из source репозитория: %w", err)
+        }</span>
+
+        // Получаем ветки из source репозитория
+        <span class="cov0" title="0">sourceBranches, err := sourceRepo.Branches()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("не удалось получить ветки из source репозитория: %w", err)
+        }</span>
+
+        // Получаем worktree для destination репозитория
+        <span class="cov0" title="0">destWorktree, err := destinationRepo.Worktree()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("не удалось получить worktree для destination репозитория: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">err = sourceBranches.ForEach(func(branchRef *plumbing.Reference) error </span><span class="cov0" title="0">{
+                branchName := branchRef.Name().Short()
+                if strings.HasPrefix(branchName, "HEAD") </span><span class="cov0" title="0">{
+                        return nil // Пропускаем HEAD
+                }</span>
+
+                <span class="cov0" title="0">log.Printf("Синхронизация ветки: %s", branchName)
+
+                // Получаем reference из fetched данных
+                fetchedRef := plumbing.NewRemoteReferenceName(remoteName, branchName)
+                fetchedBranchRef, err := destinationRepo.Reference(fetchedRef, true)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Printf("Предупреждение: не удалось найти fetched ветку %s: %v", branchName, err)
+                        return nil // Пропускаем эту ветку
+                }</span>
+
+                // Проверяем, существует ли ветка в destination репозитории
+                <span class="cov0" title="0">destBranchRef, err := destinationRepo.Reference(branchRef.Name(), true)
+                needsUpdate := false
+
+                if err == plumbing.ErrReferenceNotFound </span><span class="cov0" title="0">{
+                        // Ветка не существует в destination репозитории
+                        log.Printf("Ветка %s не существует в destination репозитории, создаем новую", branchName)
+                        needsUpdate = true
+                }</span> else<span class="cov0" title="0"> if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("ошибка при поиске ветки %s в destination репозитории: %w", branchName, err)
+                }</span> else<span class="cov0" title="0"> {
+                        // Ветка существует, проверяем, нужно ли обновление
+                        if destBranchRef.Hash() != fetchedBranchRef.Hash() </span><span class="cov0" title="0">{
+                                log.Printf("Ветка %s требует обновления (dest: %s, source: %s)", branchName, destBranchRef.Hash().String(), fetchedBranchRef.Hash().String())
+                                needsUpdate = true
+                        }</span> else<span class="cov0" title="0"> {
+                                log.Printf("Ветка %s уже синхронизирована", branchName)
+                        }</span>
+                }
+
+                <span class="cov0" title="0">if needsUpdate </span><span class="cov0" title="0">{
+                        // Переключаемся на ветку или создаем её
+                        checkoutOptions := &amp;git.CheckoutOptions{
+                                Branch: branchRef.Name(),
+                                Create: err == plumbing.ErrReferenceNotFound,
+                                Force:  true,
+                        }
+
+                        if checkoutOptions.Create </span><span class="cov0" title="0">{
+                                // Для новой ветки устанавливаем hash из fetched данных
+                                checkoutOptions.Hash = fetchedBranchRef.Hash()
+                        }</span>
+
+                        <span class="cov0" title="0">err = destWorktree.Checkout(checkoutOptions)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("не удалось переключиться на ветку %s в destination репозитории: %w", branchName, err)
+                        }</span>
+
+                        // Если ветка уже существует, обновляем её до нужного коммита
+                        <span class="cov0" title="0">if !checkoutOptions.Create </span><span class="cov0" title="0">{
+                                err = destWorktree.Reset(&amp;git.ResetOptions{
+                                        Commit: fetchedBranchRef.Hash(),
+                                        Mode:   git.HardReset,
+                                })
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return fmt.Errorf("не удалось обновить ветку %s до коммита %s: %w", branchName, fetchedBranchRef.Hash().String(), err)
+                                }</span>
+                        }
+
+                        // Выполняем push в remote репозиторий
+                        <span class="cov0" title="0">pushOptions := &amp;git.PushOptions{
+                                Auth:  destAuth,
+                                Force: true,
+                        }
+
+                        err = destinationRepo.Push(pushOptions)
+                        if err != nil &amp;&amp; err != git.NoErrAlreadyUpToDate </span><span class="cov0" title="0">{
+                                return fmt.Errorf("не удалось выполнить push ветки %s в destination репозиторий: %w", branchName, err)
+                        }</span>
+
+                        <span class="cov0" title="0">log.Printf("Ветка %s успешно синхронизирована", branchName)</span>
+                }
+
+                <span class="cov0" title="0">return nil</span>
+        })
+
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("ошибка при итерации по веткам source репозитория: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// getAuthMethod возвращает метод аутентификации на основе токена или SSH-ключа
+func (l *Logic) getAuthMethod(token, sshKeyPath string) (transport.AuthMethod, error) <span class="cov8" title="1">{
+        if token != "" </span><span class="cov8" title="1">{
+                return &amp;http.BasicAuth{
+                        Username: "oauth2", // Для GitLab Personal Access Token
+                        Password: token,
+                }, nil
+        }</span> else<span class="cov8" title="1"> if sshKeyPath != "" </span><span class="cov8" title="1">{
+                sshAuth, err := ssh.NewPublicKeysFromFile("git", sshKeyPath, "")
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, fmt.Errorf("не удалось создать SSH-аутентификацию: %w", err)
+                }</span>
+                <span class="cov0" title="0">return sshAuth, nil</span>
+        }
+        <span class="cov8" title="1">return nil, nil</span> // Нет аутентификации
+}
+
+// getRepoNameFromURL извлекает имя репозитория из URL
+func getRepoNameFromURL(repoURL string) string <span class="cov8" title="1">{
+        parts := strings.Split(repoURL, "/")
+        if len(parts) &gt; 0 </span><span class="cov8" title="1">{
+                nameWithExt := parts[len(parts)-1]
+                return strings.TrimSuffix(nameWithExt, ".git")
+        }</span>
+        <span class="cov0" title="0">return repoURL</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package test
+
+import (
+        "os"
+        "os/exec"
+        "path/filepath"
+        "testing"
+)
+
+// TestHelper содержит вспомогательные функции для тестов
+type TestHelper struct {
+        t       *testing.T
+        tempDir string
+}
+
+// NewTestHelper создает новый экземпляр TestHelper
+func NewTestHelper(t *testing.T) *TestHelper <span class="cov0" title="0">{
+        return &amp;TestHelper{
+                t:       t,
+                tempDir: t.TempDir(),
+        }
+}</span>
+
+// CreateTempFile создает временный файл с указанным содержимым
+func (h *TestHelper) CreateTempFile(filename, content string) string <span class="cov0" title="0">{
+        filePath := filepath.Join(h.tempDir, filename)
+
+        // Создаем директорию если необходимо
+        dir := filepath.Dir(filePath)
+        if err := os.MkdirAll(dir, 0755); err != nil </span><span class="cov0" title="0">{
+                h.t.Fatalf("Не удалось создать директорию %s: %v", dir, err)
+        }</span>
+
+        <span class="cov0" title="0">if err := os.WriteFile(filePath, []byte(content), 0644); err != nil </span><span class="cov0" title="0">{
+                h.t.Fatalf("Не удалось создать файл %s: %v", filePath, err)
+        }</span>
+
+        <span class="cov0" title="0">return filePath</span>
+}
+
+// CreateTempDir создает временную директорию
+func (h *TestHelper) CreateTempDir(dirname string) string <span class="cov0" title="0">{
+        dirPath := filepath.Join(h.tempDir, dirname)
+        if err := os.MkdirAll(dirPath, 0755); err != nil </span><span class="cov0" title="0">{
+                h.t.Fatalf("Не удалось создать директорию %s: %v", dirPath, err)
+        }</span>
+        <span class="cov0" title="0">return dirPath</span>
+}
+
+// GetTempDir возвращает путь к временной директории
+func (h *TestHelper) GetTempDir() string <span class="cov0" title="0">{
+        return h.tempDir
+}</span>
+
+// AssertFileExists проверяет, что файл существует
+func (h *TestHelper) AssertFileExists(filePath string) <span class="cov0" title="0">{
+        if _, err := os.Stat(filePath); os.IsNotExist(err) </span><span class="cov0" title="0">{
+                h.t.Errorf("Файл %s не существует", filePath)
+        }</span>
+}
+
+// AssertFileNotExists проверяет, что файл не существует
+func (h *TestHelper) AssertFileNotExists(filePath string) <span class="cov0" title="0">{
+        if _, err := os.Stat(filePath); !os.IsNotExist(err) </span><span class="cov0" title="0">{
+                h.t.Errorf("Файл %s существует, но не должен", filePath)
+        }</span>
+}
+
+// AssertDirExists проверяет, что директория существует
+func (h *TestHelper) AssertDirExists(dirPath string) <span class="cov0" title="0">{
+        if stat, err := os.Stat(dirPath); os.IsNotExist(err) </span><span class="cov0" title="0">{
+                h.t.Errorf("Директория %s не существует", dirPath)
+        }</span> else<span class="cov0" title="0"> if !stat.IsDir() </span><span class="cov0" title="0">{
+                h.t.Errorf("%s не является директорией", dirPath)
+        }</span>
+}
+
+// AssertDirNotExists проверяет, что директория не существует
+func (h *TestHelper) AssertDirNotExists(dirPath string) <span class="cov0" title="0">{
+        if _, err := os.Stat(dirPath); !os.IsNotExist(err) </span><span class="cov0" title="0">{
+                h.t.Errorf("Директория %s существует, но не должна", dirPath)
+        }</span>
+}
+
+// ReadFile читает содержимое файла
+func (h *TestHelper) ReadFile(filePath string) string <span class="cov0" title="0">{
+        content, err := os.ReadFile(filePath)
+        if err != nil </span><span class="cov0" title="0">{
+                h.t.Fatalf("Не удалось прочитать файл %s: %v", filePath, err)
+        }</span>
+        <span class="cov0" title="0">return string(content)</span>
+}
+
+// CreateConfigFile создает тестовый файл конфигурации
+func (h *TestHelper) CreateConfigFile(gitlabToken, sshKeyPath, tempDir string, repositories []TestRepository) string <span class="cov0" title="0">{
+        configContent := "gitlab_token: \"" + gitlabToken + "\"\n"
+        configContent += "ssh_key_path: \"" + sshKeyPath + "\"\n"
+        configContent += "temp_dir: \"" + tempDir + "\"\n"
+        configContent += "repositories:\n"
+
+        for _, repo := range repositories </span><span class="cov0" title="0">{
+                configContent += "  - gitlab_url: \"" + repo.GitlabURL + "\"\n"
+                configContent += "    private_repo_url: \"" + repo.PrivateRepoURL + "\"\n"
+        }</span>
+
+        <span class="cov0" title="0">return h.CreateTempFile("configs/config.yaml", configContent)</span>
+}
+
+// TestRepository представляет тестовый репозиторий
+type TestRepository struct {
+        GitlabURL      string
+        PrivateRepoURL string
+}
+
+// CreateTestRepositories создает набор тестовых репозиториев
+func CreateTestRepositories() []TestRepository <span class="cov0" title="0">{
+        return []TestRepository{
+                {
+                        GitlabURL:      "https://gitlab.com/user/repo1.git",
+                        PrivateRepoURL: "git@private.com:user/repo1.git",
+                },
+                {
+                        GitlabURL:      "https://gitlab.com/user/repo2.git",
+                        PrivateRepoURL: "git@private.com:user/repo2.git",
+                },
+        }
+}</span>
+
+// MockGitRepository представляет мок Git репозитория для тестов
+type MockGitRepository struct {
+        URL    string
+        Path   string
+        Exists bool
+}
+
+// CreateMockRepository создает мок репозитория
+func (h *TestHelper) CreateMockRepository(url, name string) *MockGitRepository <span class="cov0" title="0">{
+        repoPath := h.CreateTempDir(name)
+
+        // Создаем .git директорию для имитации Git репозитория
+        gitDir := filepath.Join(repoPath, ".git")
+        if err := os.MkdirAll(gitDir, 0755); err != nil </span><span class="cov0" title="0">{
+                h.t.Fatalf("Не удалось создать .git директорию: %v", err)
+        }</span>
+
+        // Создаем базовые файлы
+        <span class="cov0" title="0">h.CreateTempFile(filepath.Join(name, "README.md"), "# Test Repository")
+        h.CreateTempFile(filepath.Join(name, ".git", "config"), "[core]\nrepositoryformatversion = 0")
+
+        return &amp;MockGitRepository{
+                URL:    url,
+                Path:   repoPath,
+                Exists: true,
+        }</span>
+}
+
+// ValidateTestEnvironment проверяет тестовое окружение
+func ValidateTestEnvironment(t *testing.T) <span class="cov0" title="0">{
+        // Проверяем, что Go установлен
+        if _, err := os.Stat("/usr/local/go/bin/go"); os.IsNotExist(err) </span><span class="cov0" title="0">{
+                // Проверяем альтернативные пути
+                if _, err := exec.LookPath("go"); err != nil </span><span class="cov0" title="0">{
+                        t.Skip("Go не найден в системе, пропускаем тест")
+                }</span>
+        }
+
+        // Проверяем доступность временной директории
+        <span class="cov0" title="0">tempDir := os.TempDir()
+        if _, err := os.Stat(tempDir); os.IsNotExist(err) </span><span class="cov0" title="0">{
+                t.Fatalf("Временная директория %s недоступна", tempDir)
+        }</span>
+}
+
+// CleanupTestFiles очищает тестовые файлы (вызывается автоматически через t.TempDir())
+func (h *TestHelper) CleanupTestFiles() {<span class="cov0" title="0">
+        // Очистка происходит автоматически через t.TempDir()
+        // Эта функция оставлена для совместимости
+}</span>
+
+// AssertNoError проверяет, что ошибка равна nil
+func (h *TestHelper) AssertNoError(err error, message string) <span class="cov0" title="0">{
+        if err != nil </span><span class="cov0" title="0">{
+                h.t.Fatalf("%s: %v", message, err)
+        }</span>
+}
+
+// AssertError проверяет, что ошибка не равна nil
+func (h *TestHelper) AssertError(err error, message string) <span class="cov0" title="0">{
+        if err == nil </span><span class="cov0" title="0">{
+                h.t.Fatalf("%s: ожидалась ошибка, но получен nil", message)
+        }</span>
+}
+
+// AssertEqual проверяет равенство двух значений
+func (h *TestHelper) AssertEqual(expected, actual interface{}, message string) <span class="cov0" title="0">{
+        if expected != actual </span><span class="cov0" title="0">{
+                h.t.Errorf("%s: ожидалось %v, получено %v", message, expected, actual)
+        }</span>
+}
+
+// AssertNotEqual проверяет неравенство двух значений
+func (h *TestHelper) AssertNotEqual(expected, actual interface{}, message string) <span class="cov0" title="0">{
+        if expected == actual </span><span class="cov0" title="0">{
+                h.t.Errorf("%s: значения не должны быть равны: %v", message, expected)
+        }</span>
+}
+
+// AssertContains проверяет, что строка содержит подстроку
+func (h *TestHelper) AssertContains(str, substr, message string) <span class="cov0" title="0">{
+        if !contains(str, substr) </span><span class="cov0" title="0">{
+                h.t.Errorf("%s: строка '%s' не содержит '%s'", message, str, substr)
+        }</span>
+}
+
+// AssertNotContains проверяет, что строка не содержит подстроку
+func (h *TestHelper) AssertNotContains(str, substr, message string) <span class="cov0" title="0">{
+        if contains(str, substr) </span><span class="cov0" title="0">{
+                h.t.Errorf("%s: строка '%s' содержит '%s', но не должна", message, str, substr)
+        }</span>
+}
+
+// contains проверяет, содержит ли строка подстроку
+func contains(str, substr string) bool <span class="cov0" title="0">{
+        return len(str) &gt;= len(substr) &amp;&amp; (str == substr ||
+                (len(substr) &gt; 0 &amp;&amp; indexOf(str, substr) &gt;= 0))
+}</span>
+
+// indexOf возвращает индекс первого вхождения подстроки в строку
+func indexOf(str, substr string) int <span class="cov0" title="0">{
+        if len(substr) == 0 </span><span class="cov0" title="0">{
+                return 0
+        }</span>
+        <span class="cov0" title="0">if len(str) &lt; len(substr) </span><span class="cov0" title="0">{
+                return -1
+        }</span>
+
+        <span class="cov0" title="0">for i := 0; i &lt;= len(str)-len(substr); i++ </span><span class="cov0" title="0">{
+                if str[i:i+len(substr)] == substr </span><span class="cov0" title="0">{
+                        return i
+                }</span>
+        }
+        <span class="cov0" title="0">return -1</span>
+}
+
+// GetProjectRoot возвращает корневую директорию проекта
+func GetProjectRoot(t *testing.T) string <span class="cov0" title="0">{
+        dir, err := os.Getwd()
+        if err != nil </span><span class="cov0" title="0">{
+                t.Fatalf("Не удалось получить текущую директорию: %v", err)
+        }</span>
+
+        // Поднимаемся вверх по директориям, пока не найдем go.mod
+        <span class="cov0" title="0">for </span><span class="cov0" title="0">{
+                if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil </span><span class="cov0" title="0">{
+                        return dir
+                }</span>
+
+                <span class="cov0" title="0">parent := filepath.Dir(dir)
+                if parent == dir </span><span class="cov0" title="0">{
+                        break</span>
+                }
+                <span class="cov0" title="0">dir = parent</span>
+        }
+
+        <span class="cov0" title="0">t.Fatal("Не удалось найти корень проекта (go.mod не найден)")
+        return ""</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
