@@ -1,0 +1,35 @@
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    hostname: 'gitlab.local'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.local'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+    ports:
+      - '80:80'
+      - '443:443'
+      - '2222:22'
+    volumes:
+      - './gitlab-config:/etc/gitlab'
+      - './gitlab-logs:/var/log/gitlab'
+      - './gitlab-data:/var/opt/gitlab'
+    shm_size: '512m'
+    networks:
+      - gitlab-network
+
+  bootstrap:
+    image: curlimages/curl:latest
+    depends_on:
+      - gitlab
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "/scripts/wait-for-gitlab.sh &&
+       /scripts/init-gitlab.sh"
+    volumes:
+      - ./init-gitlab.sh:/scripts/init-gitlab.sh:ro
+      - ./wait-for-gitlab.sh:/scripts/wait-for-gitlab.sh:ro
+
+networks:
+  gitlab-network:
+    driver: bridge
